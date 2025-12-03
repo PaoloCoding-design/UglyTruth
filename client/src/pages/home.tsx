@@ -5,6 +5,9 @@ import { SearchBar } from "@/components/search-bar";
 import { ProductGrid } from "@/components/product-grid";
 import { CategoryCard } from "@/components/category-card";
 import { CATEGORIES, type Product, type Category } from "@shared/schema";
+import Link from "next/link";
+import { Card, CardContent } from "@/components/ui/card";
+import { Cpu, Monitor } from "lucide-react";
 
 export default function Home() {
   // Fetch featured products
@@ -22,60 +25,57 @@ export default function Home() {
       <Header />
 
       <main className="flex-1">
-        {/* Hero/Statement Section */}
-        <section className="py-16 md:py-24 px-4" data-testid="section-hero">
-          <div className="mx-auto max-w-4xl text-center">
-            <h1 className="font-heading text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6">
-              See the potential downsides
-              <br />
-              <span className="text-muted-foreground">before you buy.</span>
+        {/* Hero Section */}
+        <section className="py-16 px-4 bg-gradient-to-b from-muted/50 to-background" data-testid="section-hero">
+          <div className="mx-auto max-w-7xl text-center">
+            <h1 className="font-heading text-4xl md:text-5xl lg:text-6xl font-bold mb-6" data-testid="text-hero-title">
+              Find the Ugly Truth
             </h1>
-            <p className="text-lg text-muted-foreground mb-10 max-w-2xl mx-auto">
-              We focus exclusively on what could go wrong. AI-generated summaries of 
-              real user complaints and product drawbacks to help you make informed decisions.
+            <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto" data-testid="text-hero-description">
+              Unbiased, AI-powered product reviews that reveal what others won't tell you.
             </p>
-            <div className="max-w-xl mx-auto">
-              <SearchBar size="large" placeholder="Search for a product..." />
-            </div>
+            <SearchBar />
           </div>
         </section>
 
-        {/* Featured Products Section */}
-        <section className="py-12 px-4 bg-card" data-testid="section-featured">
+        {/* Main Categories Section */}
+        <section className="py-16 px-4" data-testid="section-categories">
           <div className="mx-auto max-w-7xl">
-            <div className="flex items-center justify-between mb-8">
-              <div>
-                <h2 className="font-heading text-2xl font-bold">Trending Products</h2>
-                <p className="text-muted-foreground mt-1">
-                  Popular products with notable drawbacks
-                </p>
-              </div>
-            </div>
-            <ProductGrid 
-              products={featuredProducts || []} 
-              isLoading={featuredLoading}
-              emptyMessage="No featured products available"
-            />
-          </div>
-        </section>
+            <h2 className="font-heading text-3xl font-bold mb-8 text-center" data-testid="text-categories-title">
+              Browse Products
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
+              <Link href="/pc-components">
+                <Card className="group hover-elevate cursor-pointer h-full">
+                  <CardContent className="p-6 flex flex-col items-center text-center">
+                    <div className="mb-4 p-4 rounded-full bg-muted">
+                      <Cpu className="h-8 w-8 text-foreground" />
+                    </div>
+                    <h3 className="font-heading font-bold text-lg mb-1">
+                      PC Components
+                    </h3>
+                    <p className="text-sm text-muted-foreground mb-2">
+                      CPUs, GPUs, RAM, and more
+                    </p>
+                  </CardContent>
+                </Card>
+              </Link>
 
-        {/* Categories Section */}
-        <section className="py-12 px-4" data-testid="section-categories">
-          <div className="mx-auto max-w-7xl">
-            <div className="text-center mb-10">
-              <h2 className="font-heading text-2xl font-bold mb-2">Browse by Category</h2>
-              <p className="text-muted-foreground">
-                Explore drawbacks by product type
-              </p>
-            </div>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-              {CATEGORIES.map((category) => (
-                <CategoryCard
-                  key={category}
-                  category={category}
-                  productCount={categoryCounts?.[category] || 0}
-                />
-              ))}
+              <Link href="/category/laptops">
+                <Card className="group hover-elevate cursor-pointer h-full">
+                  <CardContent className="p-6 flex flex-col items-center text-center">
+                    <div className="mb-4 p-4 rounded-full bg-muted">
+                      <Monitor className="h-8 w-8 text-foreground" />
+                    </div>
+                    <h3 className="font-heading font-bold text-lg mb-1">
+                      Other Electronics
+                    </h3>
+                    <p className="text-sm text-muted-foreground mb-2">
+                      Laptops, phones, headphones
+                    </p>
+                  </CardContent>
+                </Card>
+              </Link>
             </div>
           </div>
         </section>
