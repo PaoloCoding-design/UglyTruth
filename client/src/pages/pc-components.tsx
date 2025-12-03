@@ -5,14 +5,14 @@ import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { Card, CardContent } from "@/components/ui/card";
 import { PC_COMPONENT_TYPES, PC_COMPONENT_LABELS, COMPONENT_BRANDS, type PCComponentType } from "@shared/schema";
-import { Cpu, Gpu, HardDrive, Zap, Motherboard, Database, Fan } from "lucide-react";
+import { Cpu, Monitor, HardDrive, Zap, MemoryStick, Fan, Box } from "lucide-react";
 
 const COMPONENT_ICONS: Record<PCComponentType, React.ReactNode> = {
   cpu: <Cpu className="h-8 w-8" />,
-  gpu: <Gpu className="h-8 w-8" />,
-  ram: <Database className="h-8 w-8" />,
+  gpu: <Monitor className="h-8 w-8" />,
+  ram: <MemoryStick className="h-8 w-8" />,
   psu: <Zap className="h-8 w-8" />,
-  motherboard: <Motherboard className="h-8 w-8" />,
+  motherboard: <Box className="h-8 w-8" />,
   storage: <HardDrive className="h-8 w-8" />,
   cooling: <Fan className="h-8 w-8" />
 };
