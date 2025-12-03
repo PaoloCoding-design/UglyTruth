@@ -1,14 +1,19 @@
+
 import { Link } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CATEGORY_LABELS, type Product, type Category } from "@shared/schema";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, CheckCircle2, XCircle } from "lucide-react";
 
 interface ProductCardProps {
   product: Product;
 }
 
 export function ProductCard({ product }: ProductCardProps) {
+  const tags = product.tags ? JSON.parse(product.tags) : [];
+  const goodTags = tags.filter((t: string) => ["efficient", "quiet", "reliable", "value", "performance"].includes(t));
+  const badTags = tags.filter((t: string) => ["loud", "hot", "expensive", "incompatible", "poor-quality"].includes(t));
+
   return (
     <Link href={`/product/${product.id}`} data-testid={`card-product-${product.id}`}>
       <Card className="group overflow-visible hover-elevate cursor-pointer h-full">
@@ -47,6 +52,24 @@ export function ProductCard({ product }: ProductCardProps) {
             <h3 className="font-semibold text-base leading-tight line-clamp-2" data-testid={`text-product-name-${product.id}`}>
               {product.name}
             </h3>
+
+            {/* Tags */}
+            {(goodTags.length > 0 || badTags.length > 0) && (
+              <div className="flex flex-wrap gap-1 pt-2">
+                {goodTags.slice(0, 2).map((tag: string) => (
+                  <Badge key={tag} variant="outline" className="text-xs gap-1 border-green-500/50 text-green-700 dark:text-green-400">
+                    <CheckCircle2 className="h-3 w-3" />
+                    {tag}
+                  </Badge>
+                ))}
+                {badTags.slice(0, 2).map((tag: string) => (
+                  <Badge key={tag} variant="outline" className="text-xs gap-1 border-ugly-red/50 text-ugly-red">
+                    <XCircle className="h-3 w-3" />
+                    {tag}
+                  </Badge>
+                ))}
+              </div>
+            )}
 
             {/* Worst Issue Preview */}
             {product.worstIssue && (

@@ -1,3 +1,4 @@
+
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useParams, Link } from "wouter";
 import { useEffect } from "react";
@@ -8,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { 
   CATEGORY_LABELS, 
   type Product, 
@@ -19,7 +21,9 @@ import {
   ListMinus, 
   XCircle,
   ChevronLeft,
-  Loader2
+  Loader2,
+  CheckCircle2,
+  Info
 } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 
@@ -31,18 +35,15 @@ export default function ProductPage() {
     queryKey: ["/api/products", productId],
   });
 
-  // Mutation to generate review on-demand
   const generateReviewMutation = useMutation({
     mutationFn: async (id: string) => {
       return apiRequest("POST", `/api/products/${id}/generate-review`);
     },
     onSuccess: () => {
-      // Refetch product data after review is generated
       queryClient.invalidateQueries({ queryKey: ["/api/products", productId] });
     },
   });
 
-  // Automatically trigger review generation if not available
   useEffect(() => {
     if (product && !product.reviewGenerated && !generateReviewMutation.isPending) {
       generateReviewMutation.mutate(product.id);
@@ -85,13 +86,13 @@ export default function ProductPage() {
     );
   }
 
-  // Check if review is being generated
   const isGeneratingReview = generateReviewMutation.isPending || (!product.reviewGenerated && !generateReviewMutation.isError);
-
-  // Parse the stored JSON content
   const categoryDrawbacks = parseJsonArray(product.categoryDrawbacks);
   const modelDrawbacks = parseJsonDrawbacks(product.modelDrawbacks);
   const doNotBuyIf = parseJsonArray(product.doNotBuyIf);
+  const tags = product.tags ? JSON.parse(product.tags) : [];
+  const goodTags = tags.filter((t: string) => ["efficient", "quiet", "reliable", "value", "performance"].includes(t));
+  const badTags = tags.filter((t: string) => ["loud", "hot", "expensive", "incompatible", "poor-quality"].includes(t));
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -99,7 +100,6 @@ export default function ProductPage() {
       <WarningBanner />
 
       <main className="flex-1">
-        {/* Breadcrumb */}
         <div className="py-4 px-4 border-b">
           <div className="mx-auto max-w-7xl">
             <Link href={`/category/${product.category}`}>
@@ -111,11 +111,9 @@ export default function ProductPage() {
           </div>
         </div>
 
-        {/* Product Header */}
         <section className="py-8 px-4" data-testid="section-product-header">
           <div className="mx-auto max-w-7xl">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-              {/* Product Image */}
               <div className="relative aspect-square overflow-hidden rounded-lg bg-muted max-w-md mx-auto lg:mx-0">
                 {product.imageUrl ? (
                   <img
@@ -130,7 +128,6 @@ export default function ProductPage() {
                 )}
               </div>
 
-              {/* Product Info */}
               <div className="space-y-4">
                 <Badge variant="secondary" className="uppercase text-xs font-medium" data-testid="badge-product-category">
                   {CATEGORY_LABELS[product.category as Category]}
@@ -142,35 +139,21 @@ export default function ProductPage() {
                   {product.name}
                 </h1>
                 
-                {/* Worst Issue */}
-                {product.worstIssue && (
-                  <div className="p-4 rounded-lg bg-destructive/10 border border-destructive/20">
-                    <p className="text-sm font-medium text-destructive mb-1">
-                      Worst Reported Issue
-                    </p>
-                    <p className="text-sm" data-testid="text-worst-issue">
-                      {product.worstIssue}
-                    </p>
-                  </div>
-                )}
-
-                {/* Affiliate Button */}
-                {product.affiliateLink && (
-                  <div className="pt-4">
-                    <a
-                      href={product.affiliateLink}
-                      target="_blank"
-                      rel="noopener noreferrer nofollow"
-                      data-testid="link-affiliate"
-                    >
-                      <Button size="lg" className="gap-2">
-                        View Price
-                        <ExternalLink className="h-4 w-4" />
-                      </Button>
-                    </a>
-                    <p className="text-xs text-muted-foreground mt-2">
-                      Opens in a new tab. We may earn a commission.
-                    </p>
+                {/* Tags */}
+                {(goodTags.length > 0 || badTags.length > 0) && (
+                  <div className="flex flex-wrap gap-2">
+                    {goodTags.map((tag: string) => (
+                      <Badge key={tag} variant="outline" className="gap-1 border-green-500/50 text-green-700 dark:text-green-400">
+                        <CheckCircle2 className="h-3 w-3" />
+                        {tag}
+                      </Badge>
+                    ))}
+                    {badTags.map((tag: string) => (
+                      <Badge key={tag} variant="outline" className="gap-1 border-ugly-red/50 text-ugly-red">
+                        <XCircle className="h-3 w-3" />
+                        {tag}
+                      </Badge>
+                    ))}
                   </div>
                 )}
               </div>
@@ -178,10 +161,16 @@ export default function ProductPage() {
           </div>
         </section>
 
-        {/* Review Sections */}
         <section className="py-8 px-4 bg-card" data-testid="section-reviews">
-          <div className="mx-auto max-w-4xl space-y-12">
-            {/* Generating Review Indicator */}
+          <div className="mx-auto max-w-4xl space-y-8">
+            {/* AI Disclaimer */}
+            <Alert>
+              <Info className="h-4 w-4" />
+              <AlertDescription>
+                This review was generated using AI based on user reports and reviews found online. Information may not be completely accurate or up-to-date.
+              </AlertDescription>
+            </Alert>
+
             {isGeneratingReview && (
               <Card className="border-dashed" data-testid="card-generating">
                 <CardContent className="py-8">
@@ -196,7 +185,7 @@ export default function ProductPage() {
               </Card>
             )}
 
-            {/* Category-Level Drawbacks */}
+            {/* General Product Type Drawbacks First */}
             <Card data-testid="card-category-drawbacks">
               <CardHeader className="flex flex-row items-start gap-4">
                 <div className="p-2 rounded-md bg-muted">
@@ -204,10 +193,10 @@ export default function ProductPage() {
                 </div>
                 <div>
                   <CardTitle className="font-heading text-xl">
-                    {CATEGORY_LABELS[product.category as Category]} Drawbacks
+                    General {CATEGORY_LABELS[product.category as Category]} Issues
                   </CardTitle>
                   <p className="text-sm text-muted-foreground mt-1">
-                    General negatives about this product type
+                    Common drawbacks affecting this product category
                   </p>
                 </div>
               </CardHeader>
@@ -217,7 +206,6 @@ export default function ProductPage() {
                     <Skeleton className="h-4 w-full" />
                     <Skeleton className="h-4 w-11/12" />
                     <Skeleton className="h-4 w-10/12" />
-                    <Skeleton className="h-4 w-full" />
                   </div>
                 ) : categoryDrawbacks.length > 0 ? (
                   <ul className="space-y-3">
@@ -234,18 +222,18 @@ export default function ProductPage() {
               </CardContent>
             </Card>
 
-            {/* Model-Specific Drawbacks */}
+            {/* Model-Specific Issues */}
             <Card data-testid="card-model-drawbacks">
               <CardHeader className="flex flex-row items-start gap-4">
-                <div className="p-2 rounded-md bg-muted">
-                  <AlertTriangle className="h-5 w-5" />
+                <div className="p-2 rounded-md bg-ugly-red/10">
+                  <AlertTriangle className="h-5 w-5 text-ugly-red" />
                 </div>
                 <div>
                   <CardTitle className="font-heading text-xl">
-                    Model-Specific Issues
+                    {product.name} Specific Issues
                   </CardTitle>
                   <p className="text-sm text-muted-foreground mt-1">
-                    Common complaints reported for this specific product
+                    Problems reported specifically for this model
                   </p>
                 </div>
               </CardHeader>
@@ -266,7 +254,7 @@ export default function ProductPage() {
                   <ol className="space-y-4">
                     {modelDrawbacks.map((item, index) => (
                       <li key={index} className="flex items-start gap-3">
-                        <span className="flex-shrink-0 w-6 h-6 rounded-full bg-muted flex items-center justify-center text-xs font-medium">
+                        <span className="flex-shrink-0 w-6 h-6 rounded-full bg-ugly-red/10 flex items-center justify-center text-xs font-medium text-ugly-red">
                           {index + 1}
                         </span>
                         <div>
@@ -326,15 +314,15 @@ export default function ProductPage() {
           </div>
         </section>
 
-        {/* Bottom CTA */}
+        {/* Satisfaction Check & Affiliate Link */}
         {product.affiliateLink && (
-          <section className="py-12 px-4" data-testid="section-cta">
-            <div className="mx-auto max-w-xl text-center">
-              <h2 className="font-heading text-2xl font-bold mb-4">
-                Still interested?
+          <section className="py-12 px-4 border-t" data-testid="section-satisfaction">
+            <div className="mx-auto max-w-xl text-center space-y-6">
+              <h2 className="font-heading text-2xl font-bold">
+                Satisfied with what you've learned?
               </h2>
-              <p className="text-muted-foreground mb-6">
-                If you've considered the drawbacks and still want to proceed, you can check the current price below.
+              <p className="text-muted-foreground">
+                If you've considered the drawbacks and still want to proceed, check the current price:
               </p>
               <a
                 href={product.affiliateLink}
@@ -343,16 +331,33 @@ export default function ProductPage() {
                 data-testid="link-affiliate-bottom"
               >
                 <Button size="lg" className="gap-2">
-                  View Price
+                  View on Amazon
                   <ExternalLink className="h-4 w-4" />
                 </Button>
               </a>
-              <p className="text-xs text-muted-foreground mt-4">
+              <p className="text-xs text-muted-foreground">
                 Affiliate link. We may earn a commission from qualifying purchases.
               </p>
             </div>
           </section>
         )}
+
+        {/* Try Other Alternatives */}
+        <section className="py-12 px-4 bg-card">
+          <div className="mx-auto max-w-xl text-center">
+            <h3 className="font-heading text-xl font-bold mb-4">
+              Try Other Alternatives
+            </h3>
+            <p className="text-muted-foreground mb-6">
+              Explore similar products in this category
+            </p>
+            <Link href={`/category/${product.category}`}>
+              <Button variant="outline" size="lg">
+                Browse {CATEGORY_LABELS[product.category as Category]}
+              </Button>
+            </Link>
+          </div>
+        </section>
       </main>
 
       <Footer />
@@ -382,7 +387,6 @@ function ProductSkeleton() {
   );
 }
 
-// Helper functions to parse JSON content
 function parseJsonArray(content: string | null): string[] {
   if (!content) return [];
   try {

@@ -29,7 +29,7 @@ export function Header({ onSearch }: HeaderProps) {
           {/* Logo */}
           <Link href="/" data-testid="link-home">
             <span className="font-heading text-xl font-bold tracking-tight">
-              The <span className="text-muted-foreground">Ugly</span>
+              The <span className="text-ugly-red">Ugly</span>
             </span>
           </Link>
 
@@ -50,18 +50,21 @@ export function Header({ onSearch }: HeaderProps) {
 
           {/* Category Links - Desktop */}
           <nav className="hidden lg:flex items-center gap-1">
-            {CATEGORIES.map((category) => (
-              <Link key={category} href={`/category/${category}`}>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className={location === `/category/${category}` ? "bg-accent" : ""}
-                  data-testid={`link-category-${category}`}
-                >
-                  {CATEGORY_LABELS[category as Category]}
-                </Button>
-              </Link>
-            ))}
+            {CATEGORIES.map((category) => {
+              const href = category === "pc-components" ? "/pc-components" : `/category/${category}`;
+              return (
+                <Link key={category} href={href}>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className={location === href ? "bg-accent" : ""}
+                    data-testid={`link-category-${category}`}
+                  >
+                    {CATEGORY_LABELS[category as Category]}
+                  </Button>
+                </Link>
+              );
+            })}
           </nav>
 
           {/* Theme Toggle */}
