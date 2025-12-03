@@ -24,7 +24,9 @@ export function ProductCard({ product }: ProductCardProps) {
               />
             ) : (
               <div className="flex h-full w-full items-center justify-center bg-muted">
-                <AlertTriangle className="h-12 w-12 text-muted-foreground/50" />
+                <div className="p-2 rounded-md bg-ugly-red/10 inline-flex">
+                  <AlertTriangle className="h-4 w-4 text-ugly-red" />
+                </div>
               </div>
             )}
             {/* Category Badge */}
@@ -45,7 +47,7 @@ export function ProductCard({ product }: ProductCardProps) {
             <h3 className="font-semibold text-base leading-tight line-clamp-2" data-testid={`text-product-name-${product.id}`}>
               {product.name}
             </h3>
-            
+
             {/* Worst Issue Preview */}
             {product.worstIssue && (
               <div className="pt-2">

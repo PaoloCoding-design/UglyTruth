@@ -3,6 +3,7 @@ import { useParams } from "wouter";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { ProductGrid } from "@/components/product-grid";
+import { CategoryFilters, type FilterState } from "@/components/category-filters";
 import { 
   Select, 
   SelectContent, 
@@ -17,7 +18,7 @@ import {
   type Category,
   type ProductsResponse 
 } from "@shared/schema";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { AlertTriangle } from "lucide-react";
 
 const CATEGORY_DRAWBACKS: Record<Category, string> = {
@@ -32,6 +33,11 @@ export default function CategoryPage() {
   const params = useParams<{ category: string }>();
   const category = params.category as Category;
   const [sortBy, setSortBy] = useState("name");
+  const [filters, setFilters] = useState<FilterState>({
+    searchQuery: "",
+    selectedBrands: [],
+    priceRange: [0, 5000],
+  });
 
   const isValidCategory = CATEGORIES.includes(category);
 
@@ -45,6 +51,38 @@ export default function CategoryPage() {
     },
     enabled: isValidCategory,
   });
+
+  // Extract unique brands from products
+  const brands = useMemo(() => {
+    if (!data?.products) return [];
+    const uniqueBrands = new Set(data.products.map(p => p.brand));
+    return Array.from(uniqueBrands).sort();
+  }, [data?.products]);
+
+  // Filter products based on filters
+  const filteredProducts = useMemo(() => {
+    if (!data?.products) return [];
+    
+    return data.products.filter(product => {
+      // Search query filter (name/model)
+      if (filters.searchQuery) {
+        const query = filters.searchQuery.toLowerCase();
+        const matchesName = product.name.toLowerCase().includes(query);
+        const matchesBrand = product.brand.toLowerCase().includes(query);
+        if (!matchesName && !matchesBrand) return false;
+      }
+
+      // Brand filter
+      if (filters.selectedBrands.length > 0) {
+        if (!filters.selectedBrands.includes(product.brand)) return false;
+      }
+
+      // Price filter would go here when we have price data
+      // For now, we'll keep this placeholder
+      
+      return true;
+    });
+  }, [data?.products, filters]);
 
   if (!isValidCategory) {
     return (
@@ -91,7 +129,7 @@ export default function CategoryPage() {
           <div className="mx-auto max-w-7xl">
             <div className="flex items-center justify-between gap-4">
               <p className="text-sm text-muted-foreground">
-                Sort by:
+                {filteredProducts.length} {filteredProducts.length === 1 ? "product" : "products"}
               </p>
               <Select value={sortBy} onValueChange={setSortBy}>
                 <SelectTrigger className="w-44" data-testid="select-sort">
@@ -107,14 +145,27 @@ export default function CategoryPage() {
           </div>
         </section>
 
-        {/* Product Grid */}
+        {/* Product Grid with Filters */}
         <section className="py-8 px-4" data-testid="section-products">
           <div className="mx-auto max-w-7xl">
-            <ProductGrid 
-              products={data?.products || []} 
-              isLoading={isLoading}
-              emptyMessage={`No ${CATEGORY_LABELS[category]} products found`}
-            />
+            <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-8">
+              {/* Filters Sidebar */}
+              <aside className="lg:sticky lg:top-4 h-fit">
+                <CategoryFilters 
+                  brands={brands}
+                  onFilterChange={setFilters}
+                />
+              </aside>
+
+              {/* Product Grid */}
+              <div>
+                <ProductGrid 
+                  products={filteredProducts} 
+                  isLoading={isLoading}
+                  emptyMessage={`No ${CATEGORY_LABELS[category]} products found`}
+                />
+              </div>
+            </div>
           </div>
         </section>
       </main>

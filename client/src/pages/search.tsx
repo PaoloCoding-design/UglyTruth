@@ -4,12 +4,19 @@ import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { ProductGrid } from "@/components/product-grid";
 import { SearchBar } from "@/components/search-bar";
+import { CategoryFilters, type FilterState } from "@/components/category-filters";
 import { type ProductsResponse } from "@shared/schema";
 import { Search as SearchIcon } from "lucide-react";
+import { useState, useMemo } from "react";
 
 export default function SearchPage() {
   const searchParams = new URLSearchParams(useSearch());
   const query = searchParams.get("q") || "";
+  const [filters, setFilters] = useState<FilterState>({
+    searchQuery: "",
+    selectedBrands: [],
+    priceRange: [0, 5000],
+  });
 
   const { data, isLoading } = useQuery<ProductsResponse>({
     queryKey: ["/api/products/search", query],
@@ -21,6 +28,33 @@ export default function SearchPage() {
     },
     enabled: query.length > 0,
   });
+
+  // Extract unique brands from search results
+  const brands = useMemo(() => {
+    if (!data?.products) return [];
+    const uniqueBrands = new Set(data.products.map(p => p.brand));
+    return Array.from(uniqueBrands).sort();
+  }, [data?.products]);
+
+  // Filter search results
+  const filteredProducts = useMemo(() => {
+    if (!data?.products) return [];
+    
+    return data.products.filter(product => {
+      if (filters.searchQuery) {
+        const filterQuery = filters.searchQuery.toLowerCase();
+        const matchesName = product.name.toLowerCase().includes(filterQuery);
+        const matchesBrand = product.brand.toLowerCase().includes(filterQuery);
+        if (!matchesName && !matchesBrand) return false;
+      }
+
+      if (filters.selectedBrands.length > 0) {
+        if (!filters.selectedBrands.includes(product.brand)) return false;
+      }
+      
+      return true;
+    });
+  }, [data?.products, filters]);
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -51,8 +85,8 @@ export default function SearchPage() {
                       "Searching..."
                     ) : data ? (
                       <>
-                        Found <span className="font-medium text-foreground">{data.total}</span>{" "}
-                        {data.total === 1 ? "result" : "results"} for{" "}
+                        Found <span className="font-medium text-foreground">{filteredProducts.length}</span>{" "}
+                        {filteredProducts.length === 1 ? "result" : "results"} for{" "}
                         <span className="font-medium text-foreground">"{query}"</span>
                       </>
                     ) : (
@@ -60,11 +94,27 @@ export default function SearchPage() {
                     )}
                   </p>
                 </div>
-                <ProductGrid 
-                  products={data?.products || []} 
-                  isLoading={isLoading}
-                  emptyMessage={`No products found for "${query}"`}
-                />
+
+                <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-8">
+                  {/* Filters Sidebar */}
+                  {data && data.products.length > 0 && (
+                    <aside className="lg:sticky lg:top-4 h-fit">
+                      <CategoryFilters 
+                        brands={brands}
+                        onFilterChange={setFilters}
+                      />
+                    </aside>
+                  )}
+
+                  {/* Product Grid */}
+                  <div className={data && data.products.length > 0 ? "" : "lg:col-span-2"}>
+                    <ProductGrid 
+                      products={filteredProducts} 
+                      isLoading={isLoading}
+                      emptyMessage={`No products found for "${query}"`}
+                    />
+                  </div>
+                </div>
               </>
             ) : (
               <div className="text-center py-16">
