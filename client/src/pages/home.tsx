@@ -3,9 +3,8 @@ import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { SearchBar } from "@/components/search-bar";
 import { ProductGrid } from "@/components/product-grid";
-import { CategoryCard } from "@/components/category-card";
 import { CATEGORIES, type Product, type Category } from "@shared/schema";
-import Link from "next/link";
+import { Link } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
 import { Cpu, Monitor } from "lucide-react";
 
