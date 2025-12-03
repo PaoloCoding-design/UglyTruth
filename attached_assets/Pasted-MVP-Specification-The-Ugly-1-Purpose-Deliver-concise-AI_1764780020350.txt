@@ -1,0 +1,121 @@
+MVP Specification — “The Ugly”
+1. Purpose
+
+Deliver concise, AI-generated summaries of only the negative aspects of tech products to help users understand potential drawbacks before purchase.
+
+2. Core Features (MVP Only)
+2.1 Product Catalog
+
+Static list of 100–300 tech products.
+
+Categories: CPUs, GPUs, laptops, phones, headphones.
+
+Each product includes:
+
+Name
+
+Category
+
+Image (optional placeholder)
+
+Affiliate link
+
+2.2 “Ugly Review” Pages
+
+Each product page contains four text-based sections:
+
+Category-Level Drawbacks
+
+General negatives about the product type (e.g., IPS, gaming laptops, budget phones).
+
+AI-generated using a repeatable template.
+
+Model-Specific Drawbacks
+
+Summaries of common user complaints and issues reported publicly.
+
+Focus on recurring defects, performance problems, or reliability issues.
+
+“Do Not Buy If…” Checklist
+
+Direct, bullet-point notes describing user profiles who would be dissatisfied with the product.
+
+Affiliate Link Section
+
+Single outbound link labeled “View Price.”
+
+3. Site Structure
+3.1 Home Page
+
+Search bar
+
+List of featured or trending products
+
+Short statement of purpose:
+“See the potential downsides before you buy.”
+
+3.2 Category Listing Page
+
+List of categories
+
+Products displayed in simple list or grid format
+
+3.3 Product Review Page
+
+Contains the four “Ugly Review” sections
+
+No interactive components
+
+Text only
+
+4. Automation Requirements
+
+One-time script to import product data (CSV or JSON).
+
+One-time LLM generation pipeline:
+
+Generates the three text sections per product.
+
+Outputs stored as static text in the database or local files.
+
+No continuous scraping or automated updates in MVP.
+
+5. Excluded from MVP
+
+User accounts or login
+
+Real-time price tracking
+
+Upvotes, comments, or community features
+
+Chatbot or interactive assistant
+
+Recommendation system
+
+Mobile app
+
+Backend admin dashboard
+
+Automatic recurring content updates
+
+Push notifications
+
+Design customization beyond basic layout
+
+6. MVP Technology Overview
+
+Static or minimally dynamic site
+
+Simple JSON/CSV-based product store or SQLite
+
+Basic hosting (shared/VPS or free-tier serverless)
+
+7. MVP Success Criteria
+
+Users understand product drawbacks from short summaries.
+
+Users engage with at least one product page per visit.
+
+A small percentage click the affiliate link (validation of interest).
+
+Early SEO metrics show impressions or clicks for long-tail product queries.
